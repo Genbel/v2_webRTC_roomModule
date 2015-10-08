@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>WebRTC square</title>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="./css/main.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+		<script type="text/javascript">
+			(function () {
+				squareWebRtc = {};
+			}());
+		</script>
+	</head>
+	<body>
+		<div class="row" id="main">
+			<div class="alert alert-warning alert-dismissable" id='alert-template' aria-hidden="true" tabindex="-1" style="display:none">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				<strong></strong>
+				<p></p>
+			</div>
+			<div class="col-md-offset-4 col-md-4" style="border-color:black">
+				<div class="col-md-12">
+					<h3>WebRTC customer square</h3>
+					<p>Every customer can call each other, but only when the are able. First step is to connect to the server</p>
+				</div>
+				<div class="col-md-12" id="connect" align="center">
+					<input type="text" class="form-control" placeholder="Username" id="username">
+					<button class="btn btn-join" id="join-user">Join to WebRTC</button>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12" id="client-management">
+				<div class="col-md-offset-1 col-md-3">
+					<h5 id="state"></h5>
+					<h5 align="center" style="margin-top: 5%">Online Customers</h5>
+					<div id="connected-users"></div>
+				</div>
+				<div class="col-md-offset-1 col-md-7">
+					<h5 id="state"></h5>
+					<h5 align="center" style="margin-top: 5%">Square rooms</h5>
+					<div id="peer-to-peer">
+						<div class="col-md-12" id="personal-room">
+							<h5>Your own room</h5>
+							<div class="col-md-12" id="room-info">
+								
+							</div>
+							<div class="col-md-12">
+								<audio preload="auto" controls autoplay id="remoteAudio"></audio>
+							</div>
+						</div>
+						<div class="col-md-12" id="member-rooms">
+							<h5>Member rooms</h5>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal fade" id="callNegotiationModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="callNegotiationModal-header" aria-hidden="true">
+      		<div class="modal-dialog ">
+          		<div class="modal-content">
+              		<div class="modal-header">
+                		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                		<h3 class="modal-title" id="callNegotiationModal-header"> Call Request</h3>
+              		</div>
+              		<div class="modal-body">
+                		<div class="row">
+                    		<div class="col-md-12">
+                    			<h5 id="customer-text"></h5>
+                    			<div class="col-md-6">
+                    				<button class="btn btn-dial-modal" align="center" id="accept-call"><i class="fa fa-phone"></i> Accept</button>
+                    			</div>
+                    			<div class="col-md-6">
+                    				<button class="btn btn-hangup-modal" align="center" id="reject-call"><i class="fa fa-phone fa-rotate-90"></i> Reject</button>
+                    			</div>
+                    		</div>
+                		</div>
+              		</div>
+          		</div>
+      		</div>
+    	</div>
+		<script src='/socket.io/socket.io.js'></script>
+		<script type="text/javascript" src="./js/lib/adapter.js"></script>
+		<script type="text/javascript" src="./js/room.js"></script>
+		<script type="text/javascript" src="./js/core.js"></script>
+		<script type="text/javascript" src="./js/global.js"></script>
+	</body>
+</html>

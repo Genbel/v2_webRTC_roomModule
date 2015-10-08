@@ -1,0 +1,47 @@
+$dial-color: #00bf59;
+$busy-color: #ffa450;
+$join-color: #c41e3a;
+
+@mixin button-color($color, $width, $font-color) {
+	background-color: $color;
+	width: $width;
+	margin:10px;
+	color: $font-color;
+}
+
+.btn-dial{
+	@include button-color($dial-color, 50px, white);
+}
+.btn-dial-modal{
+	@include button-color($dial-color, 100px, white);
+}
+.btn-busy{
+	@include button-color($busy-color, 50px, black);
+}
+.btn-join{
+	@include button-color($join-color, 150px, white);
+	margin-top: 25px;
+}
+.btn-hangup{
+	@include button-color($join-color, 50px, white);
+}
+.btn-hangup-modal{
+	@include button-color($join-color, 100px, white);
+}
+.users{
+	height: 50px;
+}
+#client-management{
+	display:none;
+}
+
+#state{
+	color: $dial-color;
+}
+
+#connect{
+	margin-top: 100px;
+}
+#username{
+	width: 300px;
+}

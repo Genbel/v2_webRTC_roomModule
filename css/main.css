@@ -1,0 +1,51 @@
+.btn-dial {
+  background-color: #00bf59;
+  width: 50px;
+  margin: 10px;
+  color: white; }
+
+.btn-dial-modal {
+  background-color: #00bf59;
+  width: 100px;
+  margin: 10px;
+  color: white; }
+
+.btn-busy {
+  background-color: #ffa450;
+  width: 50px;
+  margin: 10px;
+  color: black; }
+
+.btn-join {
+  background-color: #c41e3a;
+  width: 150px;
+  margin: 10px;
+  color: white;
+  margin-top: 25px; }
+
+.btn-hangup {
+  background-color: #c41e3a;
+  width: 50px;
+  margin: 10px;
+  color: white; }
+
+.btn-hangup-modal {
+  background-color: #c41e3a;
+  width: 100px;
+  margin: 10px;
+  color: white; }
+
+.users {
+  height: 50px; }
+
+#client-management {
+  /*display:none;*/ }
+
+#state {
+  color: #00bf59; }
+
+#connect {
+  margin-top: 100px; }
+
+#username {
+  width: 300px; }
