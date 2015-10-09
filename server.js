@@ -1,6 +1,7 @@
 // Import the libraries to manage the web socket and the square
 var static = require('node-static');
-var http = require('http');
+var https = require('https');
+var fs = require('fs');
 var Room = require('./js/objects/room.js');
 var uuid = require('node-uuid');
 
@@ -8,12 +9,18 @@ var uuid = require('node-uuid');
 var host = '192.168.0.5';
 var port = '8080';
 
+// Get the private key and SSL certificate to stablish https protocol
+var options = {
+	key: fs.readFileSync('./fixtures/keys/key.pem'),
+	cert: fs.readFileSync('./fixtures/keys/key-cert.pem'),
+}
+
 // Create a node-static server instance
 var file = new(static.Server)();
 
 // We use http module's createServer function and rely
 // on our instance of node-static to serve the files
-var app = http.createServer(function(req, res){
+var app = https.createServer(options, function(req, res){
 	file.serve(req, res);
 }).listen(port, host);
 
@@ -41,20 +48,19 @@ io.sockets.on('connection', function(client){
 		var roomID = null;
 		
 		square[client.id] = { "name": username, "room": roomID };
-
+		// Sent message to the client
 		client.emit('joined', client.id);
-
-		//io.sockets.emit('update', people[client.id].name + 'is online');
+		// Sent to every socket to update their square info
 		io.sockets.emit('update-square', square);
-
-		/*client.emit("roomList", {rooms: rooms});*/
+		// Update rooms list
+		client.emit('update-room-description', {"rooms": rooms, "square": square});
 	});
+
 	// One client want to stablish connection with another client
 	// @joiner: The peer which we want to connect
 	client.on('initiator-request', function(joiner){
 
 		// Check if that user is speaking
-
 		var socketId = findSocketIdWithUsername(joiner);
 
 		if(socketId !== null){
@@ -72,7 +78,7 @@ io.sockets.on('connection', function(client){
 			// Update the client room key
 			square[client.id].room = roomUUID;
 
-			client.emit('update-uuid', { "uuid" : roomUUID });
+			//client.emit('update-uuid', { "uuid" : roomUUID });
 			io.sockets.to(socketId).emit('call-request', roomOwner);
 		}
 	});
@@ -91,14 +97,20 @@ io.sockets.on('connection', function(client){
 		// Add the client in the global room variable
 		rooms[roomUUID].addPerson(client.id);
 		rooms[roomUUID].editStatus("full");
+		// Update joiner global variables
+		client.emit("update-uuid", {"initiator" : initiator, "uuid" : roomUUID}, true);
+		// Send to the initiator actual UUID
+		client.broadcast.to(roomUUID).emit('update-uuid', { "uuid" : roomUUID }, false);
 		// Send to all peers that they can setUp description between each other.
-		io.sockets.emit('ready-to-send-description', {"rooms" : rooms, "UUID" : roomUUID, "square" : square, "initiator" : initiatorName } );
-
-
+		io.sockets.emit('update-room-description', {"rooms" : rooms, "square" : square } );
 		// Inform to the initiator that the room is ready
 		client.broadcast.to(roomUUID).emit('ready-room');
 		// Send message to the client to attach the media stream.
 		client.emit('joined-joiner-in-the-room');
+		// Update the square information, excluding the members of the room
+		updateSquareInformation(initiatorSId, client.id);
+
+		//--------------- WE CAN MAKE ALL IN ONE READY ROOM AND UPDATE UUID ----------//
 
 
 	});
@@ -112,12 +124,42 @@ io.sockets.on('connection', function(client){
 		delete rooms[roomUUID];
 		// delete from square attached room
 		square[initiatorSId].room = null;
-		io.sockets.to(initiatorSId).emit('call-rejected-answer', { "square" : square, "rooms" : rooms }); 
+		io.sockets.to(initiatorSId).emit('call-rejected-answer', { "square" : square }); 
+	});
+
+	// Disconnect the call between two peers and inform to other clients
+	// WARNING: If the message of the socket, it is 'disconnet' is doesn't work.
+	// That call has reserved the socket.io for their own management 
+	// @UUID: room identificator
+	client.on('disconnect-call', function(UUID){
+		var disconnetedPeers = new Array(); 
+		// Send to the other peer to update the room variables
+		client.broadcast.to(UUID).emit("room-closed");
+		// Delete the room and client room
+		if(rooms[UUID] !== 'undefined'){
+			for(var index in rooms[UUID].getPeople()){
+				var socketId = rooms[UUID].people[index];
+				disconnetedPeers.push(socketId);
+				square[socketId].room = null; 
+			}
+			// Update the square information, excluding the members of the room
+			io.sockets.emit('update-square', square);
+			// Delete the room for the room object
+			delete rooms[UUID];
+			// send to every socket except the sender
+			client.broadcast.emit('update-room-description', {"rooms" : rooms,"square" : square });
+		}
 	});
 
 	// Manage messages between two peers
 	client.on('message', function(node){
 		client.broadcast.to(node.room).emit('message', node.message);
+	});
+
+	// Clean the room and square variables when one user disconnet not properly
+	client.on('disconnect', function(){
+		console.log(client.id + " left the room forover!");
+		delete square[client.id];
 	});
 });
 
@@ -131,4 +173,15 @@ function findSocketIdWithUsername(username){
 		}
 	}
 	return null;
+}
+
+// Send the square information to the clients, excluding the members of the room
+// @PeerA, @PeerB
+function updateSquareInformation(PeerA, PeerB){
+
+	for(var socketId in square){
+		if(PeerA !== socketId && PeerB !== socketId){
+			io.sockets.to(socketId).emit("update-square", square);
+		}
+	}
 }

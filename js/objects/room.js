@@ -1,4 +1,4 @@
-var Room = function(id, owner){
+function Room(id, owner){
 	this.id = id;
 	this.owner;
 	this.people = [];
@@ -10,6 +10,22 @@ Room.prototype.addPerson = function(personID){
 		this.people.push(personID);
 	}
 };
+
+Room.prototype.getPeople = function(){
+
+	if(this.people !== 'undefined'){
+		return this.people;
+	}else{
+		return 'undefined';
+	}
+}
+
+Room.prototype.deletePeople = function(UUID){
+	for(var index in this.people){
+		var socketId = this.people[index];
+		square[socketId].room = null; 
+	}
+}
 
 Room.prototype.editStatus = function(status){
 	this.status = status;

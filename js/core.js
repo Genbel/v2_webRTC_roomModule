@@ -66,7 +66,7 @@
 
 			squareWebRtc.room.socket.on('message', function(message){
 				
-				if(message === 'got_user_media'){
+				if(message === 'got-user-media'){
 					core.checkAndStart();
 				// Remote Peer, in that case the initiator, send description of the SDP via server and the
 				// joiner set as RemoteDescription
@@ -186,18 +186,22 @@
 		hangup: function() {
 			console.log('Hanging up.');
 			this.stop();
-			this.sendMessage('bye');
 		},
 
 		handleRemoteHangup: function(){
 			console.log('Session terminated.');
 			this.stop();
-			this.isInitiator = false;
 		},
 
 		stop: function(){
+			// Remove the media for the Peer connection
+			this.pc.removeStream(this.localStream);
+			// Close the peer connection
+			this.pc.close();
 			this.isStarted = false;
 			this.pc = null;
+			this.isInitiator = false;
+			this.isChannelReady = false;
 		},
 
 	};
